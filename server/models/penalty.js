@@ -25,6 +25,10 @@ module.exports = {
         status: {
             type: 'string',
             required: true
+        },
+        areaCode:{
+            type: 'integer',
+            required: true
         }
     }
 };

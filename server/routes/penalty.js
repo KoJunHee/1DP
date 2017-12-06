@@ -11,7 +11,9 @@ var controller = require('../controllers/penalty');
 module.exports = [
     { method: 'GET', path: '/penalty', config: controller.findAll },
     { method: 'GET', path: '/penalty/{penaltyId}', config: controller.find },
+    { method: 'GET', path: '/penalty/area/{areaCode}', config: controller.findByArea },
     { method: 'POST', path: '/penalty', config: controller.create },
     { method: 'PUT', path: '/penalty/{penaltyId}', config: controller.update },
-    { method: 'DELETE', path: '/penalty/{penaltyId}', config: controller.destroy }
+    { method: 'DELETE', path: '/penalty/{penaltyId}', config: controller.destroy },
+    { method: 'DELETE', path: '/penalty', config: controller.destroyAll }
 ];

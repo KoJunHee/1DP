@@ -11,7 +11,6 @@ const Boom = require('boom'),
     jwt = require('jsonwebtoken'),
     Co = require('co');
 
-
 /*********************************************************************** 
  *                              - 유저 등록 (C)
 *************************************************************************/
@@ -21,20 +20,21 @@ exports.create = {
     tags: ['api'],
     validate: {
         payload: {
-            email: Joi.string().required(),
-            pwd: Joi.string().required(),
-            area: Joi.number().required().valid('1', '2', '3')
+            email: Joi.string().required().description('이메일'),
+            pwd: Joi.string().required().description('비밀번호'),
+            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역코드')
         }
     },
     auth: false,
     handler: (request, reply) => {
-        // 전체 조회
+
         User.create(request.payload)
             .exec((err, user) => {
-                // 결과
+                // 에러
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
+                //return
                 reply(user);
             });
     }
@@ -52,10 +52,15 @@ exports.findAll = {
         // 전체 조회
         User.find()
             .exec((err, user) => {
-                // 결과
+                // 에러
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
+                //유저 목록이 없으면
+                if (user.length == 0) {
+                    return reply(Boom.notFound());
+                }
+                //return
                 reply(user);
             });
     }
@@ -70,7 +75,7 @@ exports.find = {
     tags: ['api'],
     validate: {
         params: {
-            email: Joi.string().required()
+            email: Joi.string().required().description('대표 이메일')
         }
     },
     auth: false,
@@ -78,10 +83,15 @@ exports.find = {
         // 조회
         User.findOne({ email: request.params.email })
             .exec((err, user) => {
-                // 결과
+                // 에러
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
+                //유저가 없으면
+                if (!user) {
+                    return reply(Boom.notFound());
+                }
+                //return
                 reply(user);
             });
     }
@@ -96,12 +106,12 @@ exports.update = {
     tags: ['api'],
     validate: {
         params: {
-            email: Joi.string().required()
+            email: Joi.string().required().description('이메일')
         },
         payload: {
-            email: Joi.string().required(),
-            pwd: Joi.string().required(),
-            area: Joi.string().required().valid('1', '2', '3')
+            email: Joi.string().required().description('이메일'),
+            pwd: Joi.string().required().description('비밀번호'),
+            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역코드')
         }
     },
     auth: false,
@@ -109,10 +119,11 @@ exports.update = {
         // 수정
         User.update({ email: request.params.email }, request.payload)
             .exec((err, user) => {
-                // 결과
+                // 에러
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
+                //return
                 reply(user);
             });
     }
@@ -128,7 +139,7 @@ exports.destroy = {
     tags: ['api'],
     validate: {
         params: {
-            email: Joi.string().required()
+            email: Joi.string().required().description('이메일')
         }
     },
     auth: false,
@@ -136,11 +147,12 @@ exports.destroy = {
         // 삭제
         User.destroy({ email: request.params.email })
             .exec((err) => {
-                // 결과
+                // 에러
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
-                reply({ result: true });
+                //return
+                reply('destroy');
             });
     }
 };
@@ -157,10 +169,11 @@ exports.destroyAll = {
         // 삭제
         User.destroy({})
             .exec((err) => {
-                // 결과
+                // 에러
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
+                //return
                 reply('destroy all users');
             });
     }
@@ -174,9 +187,9 @@ exports.login = {
     tags: ['api'],
     validate: {
         payload: {
-            email: Joi.string().required(),
-            pwd: Joi.string().required(),
-            area: Joi.number().required()
+            email: Joi.string().required().description('이메일'),
+            pwd: Joi.string().required().description('비밀번호'),
+            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역코드')
         }
     },
     auth: {
@@ -192,19 +205,19 @@ exports.login = {
 
                 if (user) {
                     if (user.pwd == request.payload.pwd) {
-                        if (user.area == request.payload.area) {
+                        if (user.areaCode == request.payload.areaCode) {
                             var tokenData = request.payload;
                             var res = { token: jwt.sign(tokenData, 'app_server!!!') };
                             reply(res);
                         } else {
-                            return '지역코드가 일치하지 않습니다'
+                            return reply(Boom.unauthorized('지역이 일치하지 않습니다'));
                         }
                     } else {
-                        return '비밀먼호가 일치하지 않습니다'
+                        return reply(Boom.unauthorized('비밀먼호가 일치하지 않습니다'));
                     }
 
                 } else {
-                    return '존재하지 않는 이메일입니다';
+                    return reply(Boom.unauthorized('존재하지 않는 이메일입니다'));
                 }
             }
 
