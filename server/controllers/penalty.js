@@ -8,7 +8,9 @@
 
 var Boom = require('boom'),
     Joi = require('joi'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    Co = require('co');
+
 
 /*********************************************************************** 
  *                              - 벌금 등록 (C)
@@ -21,23 +23,35 @@ exports.create = {
             name: Joi.string().required().description('이름'),
             money: Joi.number().required().description('금액'),
             reason: Joi.string().required().valid('안 품', '지각', '결석').description('사유'),
-            status: Joi.string().required().valid('미입금', '입금').description('상태'),
-            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역 코드'),
+            status: Joi.string().required().valid('미입금', '입금').description('상태')
+            //areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역 코드'),
         }
     },
-    auth: false,
+    //auth: false,
     handler: function (request, reply) {
-        // 생성
-        Penalty.create(request.payload)
-            .exec(function (err, penalty) {
-                // 에러
-                if (err) {
-                    return reply(Boom.badImplementation(err));
-                }
 
-                //return
-                reply(penalty);
-            });
+        //이미 있는지 체크하고 등록
+        Co(function* () {
+            try {
+
+                //지역 코드
+                request.payload.areaCode = request.auth.credentials.areaCode;
+
+                //생성
+                var penalty = yield Penalty.create(request.payload);
+
+                //reply
+                return penalty;
+            }
+
+            catch (err) {
+                throw err;
+            }
+        }).then(function (cart) {
+            reply(cart);
+        }).catch(function (err) {
+            return reply(Boom.badImplementation(err));
+        });
     }
 };
 
