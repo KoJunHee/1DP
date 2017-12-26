@@ -11,7 +11,6 @@ var Boom = require('boom'),
     _ = require('lodash'),
     Co = require('co');
 
-
 /*********************************************************************** 
  *                              - 벌금 등록 (C)
 *************************************************************************/
@@ -23,8 +22,8 @@ exports.create = {
             name: Joi.string().required().description('이름'),
             money: Joi.number().required().description('금액'),
             reason: Joi.string().required().valid('안 품', '지각', '결석').description('사유'),
-            status: Joi.string().required().valid('미입금', '입금').description('상태')
-            //areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역 코드'),
+            status: Joi.string().required().valid('미입금', '입금').description('상태'),
+            date: Joi.string().required().description('날짜 (yy.mm.dd)')
         }
     },
     //auth: false,
@@ -35,7 +34,7 @@ exports.create = {
             try {
 
                 //지역 코드
-                request.payload.areaCode = request.auth.credentials.areaCode;
+                request.payload.area = request.auth.credentials.area;
 
                 //생성
                 var penalty = yield Penalty.create(request.payload);
@@ -43,7 +42,6 @@ exports.create = {
                 //reply
                 return penalty;
             }
-
             catch (err) {
                 throw err;
             }
@@ -75,27 +73,38 @@ exports.findAll = {
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
-
                 //벌금 목록이 없으면
                 if (penalty.length == 0) {
-                    return reply(Boom.notFound());
+                    var result = {
+                        list: [],
+                        sum: 0
+                    };
+                    reply (result);
+                }
+
+                //총합 계산
+                var sum = 0;
+                for (var i in penalty) {
+                    sum += penalty[i].money;
                 }
 
                 //pagination
                 if (!request.query.pageNumber || request.query.pageNumber == 0) {
                     request.query.pageNumber = 1;
                 }
-
                 var pagePerRow = 5;
                 var startIndex = 0;
                 var endIndex = 0;
-
                 startIndex = request.query.pageNumber == 1 ? 0 : pagePerRow * (request.query.pageNumber - 1);
                 endIndex = startIndex + pagePerRow;
                 var resultPenalty = _.slice(penalty, startIndex, endIndex);
 
                 //return
-                reply(resultPenalty);
+                var result = {
+                    list: resultPenalty,
+                    sum: sum
+                };
+                reply(result);
             });
     }
 };
@@ -139,24 +148,55 @@ exports.findByArea = {
     tags: ['api'],
     validate: {
         params: {
-            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역 코드')
+            area: Joi.string().required().valid('주안', '부평', '강남', '강북').description('지역')
+        },
+        query: {
+            pageNumber: Joi.number().description('페이지 번호')
         }
     },
     auth: false,
     handler: function (request, reply) {
         // 조회
-        Penalty.find({ areaCode: request.params.areaCode })
+        Penalty.find(request.params)
             .exec(function (err, penalty) {
                 // 에러
                 if (err) {
                     return reply(Boom.badImplementation(err));
                 }
-                //목록이 없으면
-                if (penalty.length == 0)
-                    return reply(Boom.notFound());
+
+                console.log(penalty);
+                //벌금 목록이 없으면
+                if (penalty.length == 0) {
+                    var result = {
+                        list: [],
+                        sum: 0
+                    };
+                    reply(result);
+                }
+
+                //총합 계산
+                var sum = 0;
+                for (var i in penalty) {
+                    sum += penalty[i].money;
+                }
+
+                //pagination
+                if (!request.query.pageNumber || request.query.pageNumber == 0) {
+                    request.query.pageNumber = 1;
+                }
+                var pagePerRow = 5;
+                var startIndex = 0;
+                var endIndex = 0;
+                startIndex = request.query.pageNumber == 1 ? 0 : pagePerRow * (request.query.pageNumber - 1);
+                endIndex = startIndex + pagePerRow;
+                var resultPenalty = _.slice(penalty, startIndex, endIndex);
 
                 //return
-                reply(penalty);
+                var result = {
+                    list: resultPenalty,
+                    sum: sum
+                };
+                reply(result);
             });
     }
 };
@@ -175,11 +215,11 @@ exports.update = {
             name: Joi.string().required().description('이름'),
             money: Joi.number().required().description('금액'),
             reason: Joi.string().required().valid('안 품', '지각', '결석').description('사유'),
-            status: Joi.string().required().valid('미입금', '입금').description('상태'),
-            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역 코드'),
+            status: Joi.string().required().valid('미입금', '입금').description('입금 상태'),
+            date: Joi.string().required().description('날짜 (yy.mm.dd)')
         }
     },
-    auth: false,
+    //auth: false,
     handler: function (request, reply) {
         // 수정
         Penalty.update({ id: request.params.penaltyId }, request.payload)
@@ -205,7 +245,7 @@ exports.destroy = {
             penaltyId: Joi.string().required()
         }
     },
-    auth: false,
+    //auth: false,
     handler: function (request, reply) {
         // 삭제
         Penalty.destroy({ id: request.params.penaltyId })

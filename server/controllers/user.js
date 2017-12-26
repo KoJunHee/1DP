@@ -22,7 +22,7 @@ exports.create = {
         payload: {
             email: Joi.string().required().description('이메일'),
             pwd: Joi.string().required().description('비밀번호'),
-            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역코드')
+            area: Joi.string().required().valid('주안', '부평', '강남', '강북').description('지역')
         }
     },
     auth: false,
@@ -75,7 +75,7 @@ exports.find = {
     tags: ['api'],
     validate: {
         params: {
-            email: Joi.string().required().description('대표 이메일')
+            email: Joi.string().required().description('이메일')
         }
     },
     auth: false,
@@ -111,7 +111,7 @@ exports.update = {
         payload: {
             email: Joi.string().required().description('이메일'),
             pwd: Joi.string().required().description('비밀번호'),
-            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역코드')
+            area: Joi.string().required().valid('주안', '부평', '강남', '강북').description('지역')
         }
     },
     auth: false,
@@ -189,7 +189,7 @@ exports.login = {
         payload: {
             email: Joi.string().required().description('이메일'),
             pwd: Joi.string().required().description('비밀번호'),
-            areaCode: Joi.number().required().valid('1', '2', '3', '4').description('지역코드')
+            area: Joi.string().required().valid('주안', '부평', '강남', '강북').description('지역')
         }
     },
     auth: {
@@ -205,7 +205,7 @@ exports.login = {
 
                 if (user) {
                     if (user.pwd == request.payload.pwd) {
-                        if (user.areaCode == request.payload.areaCode) {
+                        if (user.area == request.payload.area) {
                             var tokenData = request.payload;
                             var res = { token: jwt.sign(tokenData, 'app_server!!!') };
                             reply(res);

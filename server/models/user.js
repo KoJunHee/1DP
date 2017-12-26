@@ -18,8 +18,8 @@ module.exports = {
             type: 'string',
             required: true
         },
-        areaCode: {
-            type: 'integer',
+        area: {
+            type: 'string',
             required: true
         }
     }
