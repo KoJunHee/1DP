@@ -35,7 +35,7 @@ exports.create = {
                     return reply(Boom.badImplementation(err));
                 }
                 //return
-                reply(user);
+                return reply(user);
             });
     }
 };
@@ -61,7 +61,7 @@ exports.findAll = {
                     return reply(Boom.notFound());
                 }
                 //return
-                reply(user);
+                return reply(user);
             });
     }
 };
@@ -92,7 +92,7 @@ exports.find = {
                     return reply(Boom.notFound());
                 }
                 //return
-                reply(user);
+                return reply(user);
             });
     }
 };
@@ -124,7 +124,7 @@ exports.update = {
                     return reply(Boom.badImplementation(err));
                 }
                 //return
-                reply(user);
+                return reply(user);
             });
     }
 };
@@ -152,7 +152,7 @@ exports.destroy = {
                     return reply(Boom.badImplementation(err));
                 }
                 //return
-                reply('destroy');
+                return reply('destroy');
             });
     }
 };
@@ -174,7 +174,7 @@ exports.destroyAll = {
                     return reply(Boom.badImplementation(err));
                 }
                 //return
-                reply('destroy all users');
+                return reply('destroy all users');
             });
     }
 };
@@ -208,7 +208,7 @@ exports.login = {
                         if (user.area == request.payload.area) {
                             var tokenData = request.payload;
                             var res = { token: jwt.sign(tokenData, 'app_server!!!') };
-                            reply(res);
+                            return reply(res);
                         } else {
                             return reply(Boom.unauthorized('지역이 일치하지 않습니다'));
                         }

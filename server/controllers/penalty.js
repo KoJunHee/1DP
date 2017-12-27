@@ -79,7 +79,7 @@ exports.findAll = {
                         list: [],
                         sum: 0
                     };
-                    reply (result);
+                    return reply(result);
                 }
 
                 //총합 계산
@@ -99,12 +99,24 @@ exports.findAll = {
                 endIndex = startIndex + pagePerRow;
                 var resultPenalty = _.slice(penalty, startIndex, endIndex);
 
+                //전체 페이지 개수
+                var totalPagesCount;
+                var totalListCount = penalty.length;
+                var quotient = parseInt(totalListCount / pagePerRow);
+                var remainder = totalListCount % pagePerRow;
+                if (remainder != 0) {
+                    totalPagesCount = quotient + 1;
+                } else {
+                    totalPagesCount = quotient;
+                }
+
                 //return
                 var result = {
                     list: resultPenalty,
-                    sum: sum
+                    sum: sum,
+                    totalPagesCount: totalPagesCount
                 };
-                reply(result);
+                return reply(result);
             });
     }
 };
@@ -135,7 +147,7 @@ exports.find = {
                 }
 
                 //return
-                reply(penalty);
+                return reply(penalty);
             });
     }
 };
@@ -164,14 +176,13 @@ exports.findByArea = {
                     return reply(Boom.badImplementation(err));
                 }
 
-                console.log(penalty);
                 //벌금 목록이 없으면
                 if (penalty.length == 0) {
                     var result = {
                         list: [],
                         sum: 0
                     };
-                    reply(result);
+                    return reply(result);
                 }
 
                 //총합 계산
@@ -191,12 +202,25 @@ exports.findByArea = {
                 endIndex = startIndex + pagePerRow;
                 var resultPenalty = _.slice(penalty, startIndex, endIndex);
 
+
+                //전체 페이지 개수
+                var totalPagesCount;
+                var totalListCount = penalty.length;
+                var quotient = parseInt(totalListCount / pagePerRow);
+                var remainder = totalListCount % pagePerRow;
+                if (remainder != 0) {
+                    totalPagesCount = quotient + 1;
+                } else {
+                    totalPagesCount = quotient;
+                }
+
                 //return
                 var result = {
                     list: resultPenalty,
-                    sum: sum
+                    sum: sum,
+                    totalPagesCount: totalPagesCount
                 };
-                reply(result);
+                return reply(result);
             });
     }
 };
@@ -229,7 +253,7 @@ exports.update = {
                     return reply(Boom.badImplementation(err));
                 }
                 //return
-                reply(penalty);
+                return reply(penalty);
             });
     }
 };
@@ -255,7 +279,7 @@ exports.destroy = {
                     return reply(Boom.badImplementation(err));
                 }
                 //return
-                reply('destroy');
+                return reply('destroy');
             });
     }
 };
@@ -277,7 +301,7 @@ exports.destroyAll = {
                     return reply(Boom.badImplementation(err));
                 }
                 //return
-                reply('destroy');
+                return reply('destroy');
             });
     }
 };
