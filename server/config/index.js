@@ -1,25 +1,21 @@
 var config = {
     name: 'API',
     server: {
-        host: 'host',
-        port: port,
+        host: '172.31.7.75',
+        port: 8000,
         labels: ['api'],
         routes: {
             cors: { credentials: 'true' }
         }
     },
-    openApi: {
-        baseUrl: 'baseUrl',
-        myKey: 'myKey'
-    },
     database: {
         mongo:
         {
-            host: 'host',
-            username: 'username',
-            password: 'password',
-            port: 'port',
-            database: 'database'
+            host: 'ds249605.mlab.com',
+            username: 'junhee.ko',
+            password: 'qq1212qq1212!',
+            port: '49605',
+            database: '1dp'
         }
     }
 };
